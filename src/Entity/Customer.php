@@ -6,6 +6,7 @@ use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer
@@ -13,15 +14,19 @@ class Customer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['getUsers'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getUsers'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getUsers'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['getUsers'])]
     private ?string $password = null;
 
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: User::class)]

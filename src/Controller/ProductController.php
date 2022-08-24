@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ProductController extends AbstractController
 {
     #[Route('/api/products', name: 'products', methods: ['GET'])]
-    public function getProductsList(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
+    public function getProducts(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
         $productList = $productRepository->findAll();
         $jsonProductList = $serializer->serialize($productList, 'json');
