@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class UserController extends AbstractController
@@ -44,12 +46,22 @@ class UserController extends AbstractController
 
     #[Route('/api/users', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
-      UrlGeneratorInterface $urlGenerator, CustomerRepository $customerRepository)
+      UrlGeneratorInterface $urlGenerator, CustomerRepository $customerRepository, ValidatorInterface $validator)
     {
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
         $content = $request->toArray();
         $idCustomer = $content['idCustomer'] ?? -1;
         $user->setCustomer($customerRepository->find($idCustomer));
+
+        $errors = $validator->validate($user);
+        if ($errors->count() > 0) {
+          $messages = [];
+           foreach ($errors as $error) {
+                $messages[] = $error->getMessage();
+           }
+
+          return new JsonResponse($serializer->serialize($messages, 'json'), JsonResponse::HTTP_BAD_REQUEST);
+        }
 
         $em->persist($user);
         $em->flush();

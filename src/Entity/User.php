@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
@@ -17,6 +18,8 @@ class User
 
     #[ORM\Column(length: 255)]
     #[Groups(['getUsers'])]
+    #[Assert\NotBlank(message: "User name is mandatory")]
+    #[Assert\Length(min:1, max:255, minMessage: "User name must have at least {{ limit }} characters", maxMessage: "User name max characters is {{ limit }}")]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
