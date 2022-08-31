@@ -2,15 +2,24 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Client;
 use App\Entity\Customer;
 use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+
+    private $clientPasswordHasher;
+
+    public function __construct(UserPasswordHasherInterface $clientPasswordHasher)
+    {
+      $this->clientPasswordHasher = $clientPasswordHasher;
+    }
 
     public function load(ObjectManager $manager)
     {
@@ -23,6 +32,17 @@ class AppFixtures extends Fixture
             $product->setColor($colorList[array_rand($colorList)]);
             $product->setPrice($priceList[array_rand($priceList)]);
             $manager->persist($product);
+        }
+
+        $clientList = ['Orange', 'SFR', 'Bouygues', 'Free'];
+        $objectClientList = [];
+        foreach ($clientList as $key => $value) {
+          $client = new Client();
+          $client->setEmail('client@'.$value.'.com');
+          $client->setRoles(['ROLE_USER']);
+          $client->setPassword($this->clientPasswordHasher->hashPassword($client, 'password'));
+          $manager->persist($client);
+          $objectClientList[] = $client;
         }
 
         $customerList = ['Orange', 'SFR', 'Bouygues', 'Free'];
@@ -47,6 +67,8 @@ class AppFixtures extends Fixture
           $user->setCustomer($objectCustomerList[array_rand($objectCustomerList)]);
           $manager->persist($user);
         }
+
+
 
         $manager->flush();
     }
