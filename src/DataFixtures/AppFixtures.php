@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Administrator;
 use App\Entity\Client;
 use App\Entity\Customer;
 use App\Entity\Product;
@@ -34,7 +35,7 @@ class AppFixtures extends Fixture
             $manager->persist($product);
         }
 
-        $clientList = ['Orange', 'SFR', 'Bouygues', 'Free'];
+        $clientList = ['orange', 'sfr', 'bouygues', 'free'];
         $objectClientList = [];
         foreach ($clientList as $key => $value) {
           $client = new Client();
@@ -45,7 +46,13 @@ class AppFixtures extends Fixture
           $objectClientList[] = $client;
         }
 
-        $customerList = ['Orange', 'SFR', 'Bouygues', 'Free'];
+        $admin = new Client();
+        $admin->setEmail('apiadmin1@bilemo.com');
+        $admin->setRoles(['ROLE_ADMIN']);
+        $admin->setPassword($this->clientPasswordHasher->hashPassword($admin, 'password'));
+        $manager->persist($admin);
+
+        $customerList = ['orange', 'sfr', 'bouygues', 'free'];
         $objectCustomerList = [];
         foreach ($customerList as $key => $value) {
           $psw = uniqid();

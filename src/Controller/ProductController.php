@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +35,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products/{id}', name: 'deleteProduct', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to delete a product')]
     public function deleteProduct(Product $product, EntityManagerInterface $em)
     {
         $em->remove($product);
@@ -42,6 +44,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products', name: 'createProduct', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to create a product')]
     public function createProduct(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
       UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator)
     {
@@ -67,6 +70,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products/{id}', name:"updateProduct", methods:['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to update a product')]
     public function updateUser(Request $request, SerializerInterface $serializer,
       Product $currentProduct, EntityManagerInterface $em)
     {
