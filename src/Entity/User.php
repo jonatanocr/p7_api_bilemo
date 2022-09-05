@@ -34,6 +34,9 @@ class User
     #[Groups(['getUsers'])]
     private ?Customer $customer = null;
 
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Client $client = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -83,6 +86,18 @@ class User
     public function setCustomer(?Customer $customer): self
     {
         $this->customer = $customer;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
 
         return $this;
     }

@@ -40,6 +40,7 @@ class AppFixtures extends Fixture
         foreach ($clientList as $key => $value) {
           $client = new Client();
           $client->setEmail('client@'.$value.'.com');
+          $client->setName($value);
           $client->setRoles(['ROLE_USER']);
           $client->setPassword($this->clientPasswordHasher->hashPassword($client, 'password'));
           $manager->persist($client);
@@ -51,7 +52,7 @@ class AppFixtures extends Fixture
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->clientPasswordHasher->hashPassword($admin, 'password'));
         $manager->persist($admin);
-
+/*
         $customerList = ['orange', 'sfr', 'bouygues', 'free'];
         $objectCustomerList = [];
         foreach ($customerList as $key => $value) {
@@ -63,7 +64,7 @@ class AppFixtures extends Fixture
           $manager->persist($customer);
           $objectCustomerList[] = $customer;
         }
-
+*/
         //$faker = Faker\Factory::create('fr_FR');
         $faker = Factory::create('fr_FR');
         for ($i=0; $i < 50; $i++) {
@@ -71,7 +72,8 @@ class AppFixtures extends Fixture
           $user->setName('Boutique ' . $i+1);
           $user->setAddress($faker->address());
           $user->setTelephone($faker->serviceNumber());
-          $user->setCustomer($objectCustomerList[array_rand($objectCustomerList)]);
+          // change this for client entity
+          //$user->setCustomer($objectCustomerList[array_rand($objectCustomerList)]);
           $manager->persist($user);
         }
 
