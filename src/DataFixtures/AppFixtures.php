@@ -4,7 +4,6 @@ namespace App\DataFixtures;
 
 use App\Entity\Administrator;
 use App\Entity\Client;
-use App\Entity\Customer;
 use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -52,19 +51,7 @@ class AppFixtures extends Fixture
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->clientPasswordHasher->hashPassword($admin, 'password'));
         $manager->persist($admin);
-/*
-        $customerList = ['orange', 'sfr', 'bouygues', 'free'];
-        $objectCustomerList = [];
-        foreach ($customerList as $key => $value) {
-          $psw = uniqid();
-          $customer = new Customer;
-          $customer->setUsername($value);
-          $customer->setPassword($psw);
-          $customer->setEmail('admin@'.$value.'.com');
-          $manager->persist($customer);
-          $objectCustomerList[] = $customer;
-        }
-*/
+
         //$faker = Faker\Factory::create('fr_FR');
         $faker = Factory::create('fr_FR');
         for ($i=0; $i < 50; $i++) {
@@ -72,12 +59,9 @@ class AppFixtures extends Fixture
           $user->setName('Boutique ' . $i+1);
           $user->setAddress($faker->address());
           $user->setTelephone($faker->serviceNumber());
-          // change this for client entity
-          //$user->setCustomer($objectCustomerList[array_rand($objectCustomerList)]);
+          $user->setClient($objectClientList[array_rand($objectClientList)]);
           $manager->persist($user);
         }
-
-
 
         $manager->flush();
     }

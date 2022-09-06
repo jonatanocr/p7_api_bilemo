@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\CustomerRepository;
+use App\Repository\ClientRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,12 +46,12 @@ class UserController extends AbstractController
 
     #[Route('/api/users', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
-      UrlGeneratorInterface $urlGenerator, CustomerRepository $customerRepository, ValidatorInterface $validator)
+      UrlGeneratorInterface $urlGenerator, ClientRepository $clientRepository, ValidatorInterface $validator)
     {
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
         $content = $request->toArray();
-        $idCustomer = $content['idCustomer'] ?? -1;
-        $user->setCustomer($customerRepository->find($idCustomer));
+        $idClient = $content['idClient'] ?? -1;
+        $user->setClient($clientRepository->find($idClient));
 
         $errors = $validator->validate($user);
         if ($errors->count() > 0) {
@@ -73,15 +73,15 @@ class UserController extends AbstractController
 
     #[Route('/api/users/{id}', name:"updateUser", methods:['PUT'])]
     public function updateUser(Request $request, SerializerInterface $serializer,
-      User $currentUser, EntityManagerInterface $em, CustomerRepository $customerRepository)
+      User $currentUser, EntityManagerInterface $em, ClientRepository $clientRepository)
     {
         $updatedUser = $serializer->deserialize($request->getContent(),
                 User::class,
                 'json',
                 [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUser]);
         $content = $request->toArray();
-        $idCustomer = $content['idCustomer'] ?? -1;
-        $updatedUser->setCustomer($customerRepository->find($idCustomer));
+        $idClient = $content['idClient'] ?? -1;
+        $updatedUser->setClient($clientRepository->find($idClient));
 
         $em->persist($updatedUser);
         $em->flush();
