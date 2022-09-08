@@ -13,9 +13,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ClientController extends AbstractController
 {
     #[Route('/api/clients', name: 'clients', methods: ['GET'])]
-    public function getClients(ClientRepository $clientRepository, SerializerInterface $serializer): JsonResponse
+    public function getClients(ClientRepository $clientRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $clientList = $clientRepository->findAll();
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 3);
+
+        $clientList = $clientRepository->findAllWithPagination($page, $limit);
         $jsonClientList = $serializer->serialize($clientList, 'json', ['groups' => 'getUsers']);
 
         return new JsonResponse($jsonClientList, Response::HTTP_OK, [], true);
