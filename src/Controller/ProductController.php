@@ -15,17 +15,25 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class ProductController extends AbstractController
 {
     #[Route('/api/products', name: 'products', methods: ['GET'])]
-    public function getProducts(ProductRepository $productRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getProducts(ProductRepository $productRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 3);
-      
-        $productList = $productRepository->findAllWithPagination($page, $limit);
-        $jsonProductList = $serializer->serialize($productList, 'json');
+
+        $idCache = "getProducts-" . $page . "-" . $limit;
+
+        $jsonProductList = $cache->get($idCache, function (ItemInterface $item) use ($productRepository, $page, $limit, $serializer) {
+          echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE ! \n");
+          $item->tag("productsCache");
+          $productList = $productRepository->findAllWithPagination($page, $limit);
+          return $serializer->serialize($productList, 'json');
+        });
 
         return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
     }
@@ -39,8 +47,9 @@ class ProductController extends AbstractController
 
     #[Route('/api/products/{id}', name: 'deleteProduct', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to delete a product')]
-    public function deleteProduct(Product $product, EntityManagerInterface $em)
+    public function deleteProduct(Product $product, EntityManagerInterface $em, TagAwareCacheInterface $cache)
     {
+        $cache->invalidateTags(["productsCache"]);
         $em->remove($product);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
