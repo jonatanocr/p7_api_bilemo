@@ -39,9 +39,16 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products/{id}', name: 'detailProduct', methods: ['GET'])]
-    public function getDetailProduct(Product $product, SerializerInterface $serializer)
+    public function getDetailProduct(int $id, Product $product, SerializerInterface $serializer, TagAwareCacheInterface $cache)
     {
-        $jsonProduct = $serializer->serialize($product, 'json');
+        $idCache = "getProduct-" . $id;
+
+        $jsonProduct = $cache->get($idCache, function (ItemInterface $item) use ($product, $serializer) {
+          echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE ! \n");
+          $item->tag("productCache");
+          return $serializer->serialize($product, 'json');
+        });
+
         return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
     }
 
@@ -50,6 +57,7 @@ class ProductController extends AbstractController
     public function deleteProduct(Product $product, EntityManagerInterface $em, TagAwareCacheInterface $cache)
     {
         $cache->invalidateTags(["productsCache"]);
+        $cache->invalidateTags(["productCache"]);
         $em->remove($product);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
@@ -58,8 +66,10 @@ class ProductController extends AbstractController
     #[Route('/api/products', name: 'createProduct', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to create a product')]
     public function createProduct(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
-      UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator)
+      UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator, TagAwareCacheInterface $cache)
     {
+        $cache->invalidateTags(["productsCache"]);
+
         $product = $serializer->deserialize($request->getContent(), Product::class, 'json');
         $content = $request->toArray();
 
@@ -84,8 +94,10 @@ class ProductController extends AbstractController
     #[Route('/api/products/{id}', name:"updateProduct", methods:['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to update a product')]
     public function updateUser(Request $request, SerializerInterface $serializer,
-      Product $currentProduct, EntityManagerInterface $em)
+      Product $currentProduct, EntityManagerInterface $em, TagAwareCacheInterface $cache)
     {
+        $cache->invalidateTags(["productsCache"]);
+        $cache->invalidateTags(["productCache"]);
         $updatedProduct = $serializer->deserialize($request->getContent(),
                 Product::class,
                 'json',
