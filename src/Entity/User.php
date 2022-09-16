@@ -29,11 +29,7 @@ class User
     #[ORM\Column(length: 255)]
     #[Groups(['getUsers'])]
     private ?string $telephone = null;
-/*
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    #[Groups(['getUsers'])]
-    private ?Customer $customer = null;
-*/
+
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[Groups(['getUsers'])]
     private ?Client $client = null;
@@ -78,19 +74,7 @@ class User
 
         return $this;
     }
-/*
-    public function getCustomer(): ?Customer
-    {
-        return $this->customer;
-    }
 
-    public function setCustomer(?Customer $customer): self
-    {
-        $this->customer = $customer;
-
-        return $this;
-    }
-*/
     public function getClient(): ?Client
     {
         return $this->client;
