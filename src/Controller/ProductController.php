@@ -21,7 +21,8 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 class ProductController extends AbstractController
 {
     #[Route('/api/products', name: 'products', methods: ['GET'])]
-    public function getProducts(ProductRepository $productRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
+    public function getProducts(ProductRepository $productRepository, SerializerInterface $serializer,
+    Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 3);
@@ -29,7 +30,6 @@ class ProductController extends AbstractController
         $idCache = "getProducts-" . $page . "-" . $limit;
 
         $jsonProductList = $cache->get($idCache, function (ItemInterface $item) use ($productRepository, $page, $limit, $serializer) {
-          echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE ! \n");
           $item->tag("productsCache");
           $productList = $productRepository->findAllWithPagination($page, $limit);
           return $serializer->serialize($productList, 'json');
@@ -44,7 +44,6 @@ class ProductController extends AbstractController
         $idCache = "getProduct-" . $id;
 
         $jsonProduct = $cache->get($idCache, function (ItemInterface $item) use ($product, $serializer) {
-          echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE ! \n");
           $item->tag("productCache");
           return $serializer->serialize($product, 'json');
         });
@@ -93,7 +92,7 @@ class ProductController extends AbstractController
 
     #[Route('/api/products/{id}', name:"updateProduct", methods:['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to update a product')]
-    public function updateUser(Request $request, SerializerInterface $serializer,
+    public function updateProduct(Request $request, SerializerInterface $serializer,
       Product $currentProduct, EntityManagerInterface $em, TagAwareCacheInterface $cache)
     {
         $cache->invalidateTags(["productsCache"]);
