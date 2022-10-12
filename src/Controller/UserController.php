@@ -50,8 +50,7 @@ class UserController extends AbstractController
     UserInterface $client, TagAwareCacheInterface $cache)
     {
         if (!in_array('ROLE_ADMIN', $client->getRoles()) && $user->getClient() != $client) {
-          // TODO changer la JsonResponse en 404
-          return new JsonResponse('User not found.', JsonResponse::HTTP_FORBIDDEN);
+          return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
 
         $idCache = "getUser-" . $id;
@@ -69,8 +68,7 @@ class UserController extends AbstractController
     UserInterface $client, TagAwareCacheInterface $cache)
     {
         if (!in_array('ROLE_ADMIN', $client->getRoles()) && $user->getClient() != $client) {
-          // TODO changer la JsonResponse en 404
-          return new JsonResponse('User not found.', JsonResponse::HTTP_FORBIDDEN);
+          return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
         $cache->invalidateTags(["usersCache"]);
         $cache->invalidateTags(["userCache"]);
@@ -132,8 +130,7 @@ class UserController extends AbstractController
         } elseif ($updatedUser->getClient() == $client) {
           $updatedUser->setClient($client);
         } else {
-          // TODO changer la JsonResponse en 404
-          return new JsonResponse('User not found.', JsonResponse::HTTP_FORBIDDEN);
+          return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
 
         $em->persist($updatedUser);
