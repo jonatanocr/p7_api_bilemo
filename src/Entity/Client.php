@@ -8,8 +8,28 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
+use Hateoas\Configuration\Annotation as Hateoas;
 
+/**
+* @Hateoas\Relation(
+*      "self",
+*      href = @Hateoas\Route(
+*          "detailClient",
+*          parameters = { "id" = "expr(object.getId())" }
+*      ),
+*      exclusion = @Hateoas\Exclusion(groups="getUsers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+* )
+*
+* * @Hateoas\Relation(
+*      "update",
+*      href = @Hateoas\Route(
+*          "updateClient",
+*          parameters = { "id" = "expr(object.getId())" },
+*      ),
+*      exclusion = @Hateoas\Exclusion(groups="getUsers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+* )
+*/
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {

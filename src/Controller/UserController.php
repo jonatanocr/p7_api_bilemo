@@ -14,7 +14,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\SerializationContext;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -36,10 +37,12 @@ class UserController extends AbstractController
 
         $idCache = "getUsers-" . $page . "-" . $limit;
 
-        $jsonUserList = $cache->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit, $serializer, $linkedClient) {
+        $context = SerializationContext::create()->setGroups(["getUsers"]);
+        $jsonUserList = $cache->get($idCache, function (ItemInterface $item) use (
+          $userRepository, $page, $limit, $serializer, $linkedClient, $context) {
           $item->tag("usersCache");
           $userList = $userRepository->findAllWithPagination($page, $limit, $linkedClient);
-          return $serializer->serialize($userList, 'json', ['groups' => 'getUsers']);
+          return $serializer->serialize($userList, 'json', $context);
         });
 
         return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
@@ -54,10 +57,10 @@ class UserController extends AbstractController
         }
 
         $idCache = "getUser-" . $id;
-
-        $jsonUser = $cache->get($idCache, function (ItemInterface $item) use ($user, $serializer) {
+        $context = SerializationContext::create()->setGroups(["getUsers"]);
+        $jsonUser = $cache->get($idCache, function (ItemInterface $item) use ($user, $serializer, $context) {
           $item->tag("userCache");
-          return $serializer->serialize($user, 'json', ['groups' => 'getUsers']);
+          return $serializer->serialize($user, 'json', $context);
         });
 
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
@@ -106,7 +109,8 @@ class UserController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getUsers']);
+        $context = SerializationContext::create()->setGroups(["getUsers"]);
+        $jsonUser = $serializer->serialize($user, 'json', $context);
         $location = $urlGenerator->generate('detailUser', ['id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonUser, Response::HTTP_CREATED, ["Location" => $location], true);
     }
@@ -114,11 +118,26 @@ class UserController extends AbstractController
     #[Route('/api/users/{id}', name:"updateUser", methods:['PUT'])]
     public function updateUser(Request $request, SerializerInterface $serializer,
       User $currentUser, EntityManagerInterface $em, ClientRepository $clientRepository,
-      UserInterface $client, TagAwareCacheInterface $cache)
+      UserInterface $client, TagAwareCacheInterface $cache, ValidatorInterface $validator)
     {
         $cache->invalidateTags(["usersCache"]);
         $cache->invalidateTags(["userCache"]);
 
+        $newUser = $serializer->deserialize($request->getContent(), User::class, 'json');
+        $currentUser->setName($newUser->getName());
+        $currentUser->setAddress($newUser->getAddress());
+        $currentUser->setTelephone($newUser->getTelephone());
+        $content = $request->toArray();
+        if (in_array('ROLE_ADMIN', $client->getRoles())) {
+          $idClient = $content['idClient'] ?? -1;
+          $currentUser->setClient($clientRepository->find($idClient));
+        } elseif ($newUser->getClient() == $client) {
+          $currentUser->setClient($client);
+        } else {
+          return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        /*
         $updatedUser = $serializer->deserialize($request->getContent(),
                 User::class,
                 'json',
@@ -132,8 +151,18 @@ class UserController extends AbstractController
         } else {
           return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
+*/
+        $errors = $validator->validate($currentUser);
+        if ($errors->count() > 0) {
+          $messages = [];
+           foreach ($errors as $error) {
+                $messages[] = $error->getMessage();
+           }
 
-        $em->persist($updatedUser);
+          return new JsonResponse($serializer->serialize($messages, 'json'), JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $em->persist($currentUser);
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
    }

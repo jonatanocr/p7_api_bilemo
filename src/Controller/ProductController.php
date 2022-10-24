@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -93,17 +93,27 @@ class ProductController extends AbstractController
     #[Route('/api/products/{id}', name:"updateProduct", methods:['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'You don\'t have the right to update a product')]
     public function updateProduct(Request $request, SerializerInterface $serializer,
-      Product $currentProduct, EntityManagerInterface $em, TagAwareCacheInterface $cache)
+      Product $currentProduct, EntityManagerInterface $em, TagAwareCacheInterface $cache, ValidatorInterface $validator)
     {
         $cache->invalidateTags(["productsCache"]);
         $cache->invalidateTags(["productCache"]);
-        $updatedProduct = $serializer->deserialize($request->getContent(),
-                Product::class,
-                'json',
-                [AbstractNormalizer::OBJECT_TO_POPULATE => $currentProduct]);
-        $content = $request->toArray();
 
-        $em->persist($updatedProduct);
+        $newProduct = $serializer->deserialize($request->getContent(), Product::class, 'json');
+        $currentProduct->setName($newProduct->getName());
+        $currentProduct->setDescription($newProduct->getDescription());
+        $currentProduct->setColor($newProduct->getColor());
+        $currentProduct->setPrice($newProduct->getPrice());
+
+        $errors = $validator->validate($currentProduct);
+        if ($errors->count() > 0) {
+          $messages = [];
+           foreach ($errors as $error) {
+                $messages[] = $error->getMessage();
+           }
+          return new JsonResponse($serializer->serialize($messages, 'json'), JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $em->persist($currentProduct);
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
    }
