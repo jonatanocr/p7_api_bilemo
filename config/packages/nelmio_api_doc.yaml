@@ -10,16 +10,16 @@ nelmio_api_doc:
                     tags:
                         - Token
                     operationId: postCredentialsItem
-                    summary: Permet d'obtenir le token JWT pour se logger.
+                    summary: To get JWT token to login.
                     requestBody:
-                        description: Crée un nouveau token JWT
+                        description: Create a new JWT token
                         content:
                             application/json:
                                 schema:
                                     $ref: '#/components/schemas/Credentials'
                     responses:
                         '200':
-                            description: Récupère le token JWT
+                            description: Get the token JWT
                             content:
                                 application/json:
                                     schema:
@@ -37,7 +37,7 @@ nelmio_api_doc:
                     properties:
                         username:
                             type: string
-                            default: apiadmin1@bilemo.com
+                            default: exemple@bilemo.com
                         password:
                             type: string
                             default: password
@@ -49,5 +49,6 @@ nelmio_api_doc:
         security:
             - bearerAuth: []
     areas: # to filter documented areas
+        disable_default_routes: true
         path_patterns:
             - ^/api(?!/doc$) # Accepts routes under /api except /api/doc

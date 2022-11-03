@@ -46,17 +46,17 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'apiDoc'])]
     #[Assert\NotBlank(message: "User name is mandatory")]
     #[Assert\Length(min:1, max:255, minMessage: "User name must have at least {{ limit }} characters", maxMessage: "User name max characters is {{ limit }}")]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'apiDoc'])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'apiDoc'])]
     private ?string $telephone = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]

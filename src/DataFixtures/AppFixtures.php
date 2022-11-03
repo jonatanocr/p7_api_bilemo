@@ -46,13 +46,20 @@ class AppFixtures extends Fixture
           $objectClientList[] = $client;
         }
 
+        $exemple = new Client();
+        $exemple->setEmail('exemple@bilemo.com');
+        $exemple->setName('Test client');
+        $exemple->setRoles(['ROLE_USER']);
+        $exemple->setPassword($this->clientPasswordHasher->hashPassword($exemple, 'password'));
+        $manager->persist($exemple);
+        $objectClientList[] = $exemple;
+
         $admin = new Client();
         $admin->setEmail('apiadmin1@bilemo.com');
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->clientPasswordHasher->hashPassword($admin, 'password'));
         $manager->persist($admin);
 
-        //$faker = Faker\Factory::create('fr_FR');
         $faker = Factory::create('fr_FR');
         for ($i=0; $i < 50; $i++) {
           $user = new User;

@@ -17,9 +17,44 @@ use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 class ProductController extends AbstractController
 {
+
+    /**
+    * Method to get all the products
+    *
+    * @OA\Response(
+    *     response=200,
+    *     description="Return list of products",
+    *     @OA\JsonContent(
+    *        type="array",
+     *        @OA\Items(ref=@Model(type=Product::class))
+    *     )
+    * )
+    * @OA\Parameter(
+    *     name="page",
+    *     in="query",
+    *     description="The specific page to get",
+    *     @OA\Schema(type="int")
+    * )
+    *
+    * @OA\Parameter(
+    *     name="limit",
+    *     in="query",
+    *     description="Number of elements",
+    *     @OA\Schema(type="int")
+    * )
+    * @OA\Tag(name="Products")
+    *
+    * @param ProductRepository $productRepository
+    * @param SerializerInterface $serializer
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/products', name: 'products', methods: ['GET'])]
     public function getProducts(ProductRepository $productRepository, SerializerInterface $serializer,
     Request $request, TagAwareCacheInterface $cache): JsonResponse
@@ -38,6 +73,24 @@ class ProductController extends AbstractController
         return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
     }
 
+    /**
+    * Method to get all detail of one product
+    *
+    * @OA\Response(
+    *     response=200,
+    *     description="Return detail of one product",
+    *     @OA\JsonContent(
+    *        type="array",
+     *        @OA\Items(ref=@Model(type=Product::class))
+    *     )
+    * )
+    * @OA\Tag(name="Products")
+    *
+    * @param ProductRepository $productRepository
+    * @param SerializerInterface $serializer
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/products/{id}', name: 'detailProduct', methods: ['GET'])]
     public function getDetailProduct(int $id, Product $product, SerializerInterface $serializer, TagAwareCacheInterface $cache)
     {

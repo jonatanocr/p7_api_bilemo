@@ -20,9 +20,44 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 class UserController extends AbstractController
 {
+
+    /**
+    * Method to get all the company's users
+    *
+    * @OA\Response(
+    *     response=200,
+    *     description="Return company's users",
+    *     @OA\JsonContent(
+    *        type="array",
+    *        @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+    *     )
+    * )
+    * @OA\Parameter(
+    *     name="page",
+    *     in="query",
+    *     description="The specific page to get",
+    *     @OA\Schema(type="int")
+    * )
+    *
+    * @OA\Parameter(
+    *     name="limit",
+    *     in="query",
+    *     description="Number of elements",
+    *     @OA\Schema(type="int")
+    * )
+    * @OA\Tag(name="Users")
+    *
+    * @param UserRepository $userRepository
+    * @param SerializerInterface $serializer
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/users', name: 'users', methods: ['GET'])]
     public function getUsers(UserRepository $userRepository, SerializerInterface $serializer, Request $request,
     UserInterface $client, TagAwareCacheInterface $cache): JsonResponse
@@ -48,6 +83,24 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
     }
 
+    /**
+    * Method to get detail of one user
+    *
+    * @OA\Response(
+    *     response=200,
+    *     description="Return detail of one users",
+    *     @OA\JsonContent(
+    *        type="array",
+    *        @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+    *     )
+    * )
+    * @OA\Tag(name="Users")
+    *
+    * @param UserRepository $userRepository
+    * @param SerializerInterface $serializer
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/users/{id}', name: 'detailUser', methods: ['GET'])]
     public function getDetailUser(int $id, User $user, SerializerInterface $serializer,
     UserInterface $client, TagAwareCacheInterface $cache)
@@ -66,6 +119,20 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
 
+    /**
+    * Method to delete user
+    *
+    * @OA\Response(
+    *     response=204,
+    *     description="Return empty JsonResponse",
+    * )
+    * @OA\Tag(name="Users")
+    *
+    * @param EntityManagerInterface $em
+    * @param UserInterface $client
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/users/{id}', name: 'deleteUser', methods: ['DELETE'])]
     public function deleteUser(User $user, EntityManagerInterface $em,
     UserInterface $client, TagAwareCacheInterface $cache)
@@ -80,6 +147,32 @@ class UserController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+/*
+ @Model(type=User::class, groups={"non_sensitive_data"})
+*/
+
+    /**
+    * Method to get all the company's users
+    *
+    * @OA\Response(
+    *     response=201,
+    *     description="Return created user",
+    *     @OA\JsonContent(
+    *        type="array",
+    *        @OA\Items(ref=@Model(type=User::class, groups={"getUsers"}))
+    *     )
+    * )
+    * @OA\RequestBody(
+    *     @Model(type=User::class, groups={"apiDoc"})
+    * )
+    *
+    * @OA\Tag(name="Users")
+    *
+    * @param UserRepository $userRepository
+    * @param SerializerInterface $serializer
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/users', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
       UrlGeneratorInterface $urlGenerator, ClientRepository $clientRepository, ValidatorInterface $validator,
@@ -136,22 +229,7 @@ class UserController extends AbstractController
         } else {
           return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
-
-        /*
-        $updatedUser = $serializer->deserialize($request->getContent(),
-                User::class,
-                'json',
-                [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUser]);
-        $content = $request->toArray();
-        if (in_array('ROLE_ADMIN', $client->getRoles())) {
-          $idClient = $content['idClient'] ?? -1;
-          $updatedUser->setClient($clientRepository->find($idClient));
-        } elseif ($updatedUser->getClient() == $client) {
-          $updatedUser->setClient($client);
-        } else {
-          return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
-        }
-*/
+        
         $errors = $validator->validate($currentUser);
         if ($errors->count() > 0) {
           $messages = [];
