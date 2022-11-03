@@ -215,7 +215,6 @@ class UserController extends AbstractController
     {
         $cache->invalidateTags(["usersCache"]);
         $cache->invalidateTags(["userCache"]);
-
         $newUser = $serializer->deserialize($request->getContent(), User::class, 'json');
         $currentUser->setName($newUser->getName());
         $currentUser->setAddress($newUser->getAddress());
@@ -229,17 +228,14 @@ class UserController extends AbstractController
         } else {
           return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
-        
         $errors = $validator->validate($currentUser);
         if ($errors->count() > 0) {
           $messages = [];
            foreach ($errors as $error) {
                 $messages[] = $error->getMessage();
            }
-
           return new JsonResponse($serializer->serialize($messages, 'json'), JsonResponse::HTTP_BAD_REQUEST);
         }
-
         $em->persist($currentUser);
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
