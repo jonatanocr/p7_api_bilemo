@@ -15,7 +15,7 @@ git clone https://github.com/jonatanocr/p7_api_bilemo.git
 ```
 ### 3. Configuration and dependencies
 ```
-cd your_project_dir
+cd p7_api_bilemo
 # edit .env.exemple to .env file to match your configuration
 
 # make Composer install the project's dependencies into vendor/
