@@ -11,7 +11,7 @@ symfony cli, composer
 ### 2. clone the project
 ```
 cd your_project_dir
-git https://github.com/jonatanocr/p7_api_bilemo.git
+git clone https://github.com/jonatanocr/p7_api_bilemo.git
 ```
 ### 3. Configuration and dependencies
 ```
