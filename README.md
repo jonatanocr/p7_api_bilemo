@@ -45,7 +45,8 @@ API endpoint http://127.0.0.1:8000/api/login_check
 }
 ```
 You'll recive a JWT
-Documentation url http://127.0.0.1:8000/api/doc 
+
+API documentation url `http://127.0.0.1:8000/api/doc`
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
