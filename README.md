@@ -30,7 +30,6 @@ php bin/console doctrine:fixtures:load
 ```
 ### 5. Generate the SSL keys
 `php bin/console lexik:jwt:generate-keypair`
-[php bin/console lexik:jwt:generate-keypair](https://github.com/lexik/LexikJWTAuthenticationBundle/blob/2.x/Resources/doc/index.rst#generate-the-ssl-keys)
 
 ### 6. Start server
 `symfony server:start`
