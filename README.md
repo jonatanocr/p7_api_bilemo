@@ -28,6 +28,24 @@ php bin/console doctrine:database:create
 php bin/console doctrine:schema:update --force
 php bin/console doctrine:fixtures:load
 ```
+### 5. Generate the SSL keys
+`php bin/console lexik:jwt:generate-keypair`
+[php bin/console lexik:jwt:generate-keypair](https://github.com/lexik/LexikJWTAuthenticationBundle/blob/2.x/Resources/doc/index.rst#generate-the-ssl-keys)
+
+### 6. Start server
+`symfony server:start`
+
+### 7.Login
+You can test the API using the exemple account
+```
+API endpoint http://127.0.0.1:8000/api/login_check
+{
+    "username": "exemple@bilemo.com",
+    "password": "password"
+}
+```
+You'll recive a JWT
+Documentation url http://127.0.0.1:8000/api/doc 
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
