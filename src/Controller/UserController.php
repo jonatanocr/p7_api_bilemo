@@ -152,7 +152,7 @@ class UserController extends AbstractController
 */
 
     /**
-    * Method to get all the company's users
+    * Method to add user
     *
     * @OA\Response(
     *     response=201,
