@@ -209,9 +209,10 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/users/{id}', name:"updateUser", methods:['PUT'])]
-    public function updateUser(Request $request, SerializerInterface $serializer,
+    public function updateUser(int $id, Request $request, SerializerInterface $serializer,
       User $currentUser, EntityManagerInterface $em, ClientRepository $clientRepository,
-      UserInterface $client, TagAwareCacheInterface $cache, ValidatorInterface $validator)
+      UserInterface $client, TagAwareCacheInterface $cache, ValidatorInterface $validator,
+      UserRepository $userRepository)
     {
         $cache->invalidateTags(["usersCache"]);
         $cache->invalidateTags(["userCache"]);
@@ -220,13 +221,14 @@ class UserController extends AbstractController
         $currentUser->setAddress($newUser->getAddress());
         $currentUser->setTelephone($newUser->getTelephone());
         $content = $request->toArray();
+        $checkUserClient = $userRepository->find($id);
         if (in_array('ROLE_ADMIN', $client->getRoles())) {
           $idClient = $content['idClient'] ?? -1;
           $currentUser->setClient($clientRepository->find($idClient));
-        } elseif ($newUser->getClient() == $client) {
-          $currentUser->setClient($client);
+        } elseif ($checkUserClient->getClient()->getId() === $client->getId()) {
+            $currentUser->setClient($client);
         } else {
-          return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
+            return new JsonResponse('User not found.', JsonResponse::HTTP_NOT_FOUND);
         }
         $errors = $validator->validate($currentUser);
         if ($errors->count() > 0) {
