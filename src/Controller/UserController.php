@@ -147,9 +147,9 @@ class UserController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-/*
- @Model(type=User::class, groups={"non_sensitive_data"})
-*/
+    /*
+     @Model(type=User::class, groups={"non_sensitive_data"})
+    */
 
     /**
     * Method to add user
@@ -208,6 +208,24 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUser, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
+    /**
+    * Method to update user
+    *
+    * @OA\Response(
+    *     response=204,
+    *     description="Return empty JsonResponse",
+    * )
+    * @OA\RequestBody(
+    *     @Model(type=User::class, groups={"apiDoc"})
+    * )
+    *
+    * @OA\Tag(name="Users")
+    *
+    * @param UserRepository $userRepository
+    * @param SerializerInterface $serializer
+    * @param Request $request
+    * @return JsonResponse
+    */
     #[Route('/api/users/{id}', name:"updateUser", methods:['PUT'])]
     public function updateUser(int $id, Request $request, SerializerInterface $serializer,
       User $currentUser, EntityManagerInterface $em, ClientRepository $clientRepository,
