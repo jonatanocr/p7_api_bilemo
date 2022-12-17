@@ -4,9 +4,38 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use JMS\Serializer\Annotation\Groups;
+use Hateoas\Configuration\Annotation as Hateoas;
 
+/**
+* @Hateoas\Relation(
+*      "self",
+*      href = @Hateoas\Route(
+*          "detailUser",
+*          parameters = { "id" = "expr(object.getId())" }
+*      ),
+*      exclusion = @Hateoas\Exclusion(groups="getUsers"),
+* )
+*
+* @Hateoas\Relation(
+*      "delete",
+*      href = @Hateoas\Route(
+*          "deleteUser",
+*          parameters = { "id" = "expr(object.getId())" },
+*      ),
+*      exclusion = @Hateoas\Exclusion(groups="getUsers"),
+* )
+*
+* * @Hateoas\Relation(
+*      "update",
+*      href = @Hateoas\Route(
+*          "updateUser",
+*          parameters = { "id" = "expr(object.getId())" },
+*      ),
+*      exclusion = @Hateoas\Exclusion(groups="getUsers"),
+* )
+*/
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
 {
@@ -17,23 +46,19 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'apiDoc'])]
     #[Assert\NotBlank(message: "User name is mandatory")]
     #[Assert\Length(min:1, max:255, minMessage: "User name must have at least {{ limit }} characters", maxMessage: "User name max characters is {{ limit }}")]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'apiDoc'])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'apiDoc'])]
     private ?string $telephone = null;
-/*
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    #[Groups(['getUsers'])]
-    private ?Customer $customer = null;
-*/
+
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[Groups(['getUsers'])]
     private ?Client $client = null;
@@ -78,19 +103,7 @@ class User
 
         return $this;
     }
-/*
-    public function getCustomer(): ?Customer
-    {
-        return $this->customer;
-    }
 
-    public function setCustomer(?Customer $customer): self
-    {
-        $this->customer = $customer;
-
-        return $this;
-    }
-*/
     public function getClient(): ?Client
     {
         return $this->client;

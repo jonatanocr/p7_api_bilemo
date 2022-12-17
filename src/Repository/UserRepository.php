@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Entity\Client;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -38,11 +39,19 @@ class UserRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-    
-    public function findAllWithPagination($page, $limit) {
-        $qb = $this->createQueryBuilder('b')
-            ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit);
+
+    public function findAllWithPagination($page, $limit, $linkedClient) {
+        if ($linkedClient > 0) {
+          $qb = $this->createQueryBuilder('b')
+              ->andWhere('b.client = :val')
+              ->setParameter('val', $linkedClient)
+              ->setFirstResult(($page - 1) * $limit)
+              ->setMaxResults($limit);
+        } else {
+          $qb = $this->createQueryBuilder('b')
+              ->setFirstResult(($page - 1) * $limit)
+              ->setMaxResults($limit);
+        }
         return $qb->getQuery()->getResult();
     }
 
